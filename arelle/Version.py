@@ -30,7 +30,7 @@ def getDefaultVersion() -> str:
 
 
 def getVersion() -> str:
-    for version_fetcher in [getBuildVersion, getGitHash, getDefaultVersion]:
+    for version_fetcher in [getBuildVersion, getDefaultVersion]:
         fetched_version = version_fetcher()
         if fetched_version is not None:
             return fetched_version

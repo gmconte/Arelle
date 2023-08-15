@@ -1,0 +1,17 @@
+FROM python:3-slim
+
+WORKDIR /usr/src/app
+
+#RUN echo 'deb http://deb.debian.org/debian testing main' >> /etc/apt/sources.list \
+ #   && apt-get update && apt-get install --no-install-recommends -y gcc 
+RUN apt-get update -y
+RUN apt-get upgrade -y
+RUN apt-get install unixodbc-dev gcc -y
+
+ADD requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+ADD arelleCmdLine.py /usr/src/app
+ADD arelle /usr/src/app/arelle
+
+CMD ["python", "arelleCmdLine.py", "--webserver=0.0.0.0:8080"]
+EXPOSE 8080

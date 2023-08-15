@@ -22,6 +22,7 @@ RUN apt-get update -y && \
         libnss3-dev \
         libreadline-dev \
         libsqlite3-dev \
+	libssl-dev \
         libtk8.6 \
         libxml2-dev \
         libxmlsec1-dev \
@@ -70,7 +71,7 @@ RUN wget https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VER
     && rm -r ./Python-${PYTHON_VERSION} \
     && rm ./Python-${PYTHON_VERSION}.tgz
 
-RUN pip3 install --upgrade pip setuptools wheel
+RUN pip3 install --upgrade pip ssl setuptools wheel
 
 WORKDIR /build
 

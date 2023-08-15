@@ -1,7 +1,14 @@
 version: '2.1'
 
+networks:
+  botnet:
+
 services:
   arelle:
     build: .
     ports:
       - "8080:8080"
+    volumes:
+      - /home/conte/Downloads:/home/app
+    networks:
+      - botnet

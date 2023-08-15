@@ -1,9 +1,11 @@
-FROM python:3.11
+FROM python:3-alpine
 
 WORKDIR /usr/src/app
 
-RUN apt update -y
-RUN apt-get install unixodbc-dev -y
+#RUN apt-get update -y
+#RUN apt-get upgrade -y
+#RUN apt-get install unixodbc-dev gcc -y
+RUN apk  add --update --no-cache unixodbc-dev gcc
 
 ADD requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
