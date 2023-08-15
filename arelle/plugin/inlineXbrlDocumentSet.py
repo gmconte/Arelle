@@ -60,7 +60,7 @@ from arelle.FileSource import archiveFilenameParts, archiveFilenameSuffixes
 from arelle.ModelInstanceObject import ModelInlineFootnote
 from arelle.ModelObject import ModelObject
 from arelle.ModelDocument import ModelDocument, ModelDocumentReference, Type, load, create, inlineIxdsDiscover
-from arelle.ModelValue import qname
+from arelle.ModelValue import INVALIDixVALUE, qname
 from arelle.PluginManager import pluginClassMethods
 from arelle.PythonUtil import attrdict
 from arelle.UrlUtil import isHttpUrl
@@ -151,9 +151,6 @@ def inlineXbrlDocumentSetLoader(modelXbrl, normalizedUri, filepath, isEntry=Fals
                 # set reference to ix document in document set surrogate object
                 referencedDocument = ModelDocumentReference("inlineDocument", elt)
                 ixdocset.referencesDocument[ixdoc] = referencedDocument
-                for referencedDoc in ixdoc.referencesDocument.keys():
-                    if referencedDoc.type == Type.SCHEMA:
-                        ixdocset.targetDocumentSchemaRefs.add(ixdoc.relativeUri(referencedDoc.uri))
                 ixdocset.ixNS = ixdoc.ixNS # set docset ixNS
                 if _firstdoc:
                     _firstdoc = False
@@ -161,6 +158,10 @@ def inlineXbrlDocumentSetLoader(modelXbrl, normalizedUri, filepath, isEntry=Fals
                 ixdoc.inDTS = True # behaves like an entry
         if hasattr(modelXbrl, "ixdsHtmlElements"): # has any inline root elements
             inlineIxdsDiscover(modelXbrl, ixdocset) # compile cross-document IXDS references
+            for ixdoc in ixdocset.referencesDocument.keys():
+                for referencedDoc in ixdoc.referencesDocument.keys():
+                    if referencedDoc.type == Type.SCHEMA:
+                        ixdocset.targetDocumentSchemaRefs.add(ixdoc.relativeUri(referencedDoc.uri))
             return ixdocset
     return None
 
@@ -246,10 +247,10 @@ def createTargetInstance(modelXbrl, targetUrl, targetDocumentSchemaRefs, filingF
                     text = None
                 elif ( not(modelConcept.baseXsdType == "token" and modelConcept.isEnumeration)
                        and fact.xValid ):
-                    text = fact.xValue
+                    text = fact.rawValue if fact.xValue == INVALIDixVALUE else fact.xValue
                 # may need a special case for QNames (especially if prefixes defined below root)
                 else:
-                    text = fact.textValue
+                    text = fact.rawValue if fact.textValue == INVALIDixVALUE else fact.textValue
                 for attrName, attrValue in fact.items():
                     if attrName.startswith("{"):
                         attrs[qname(attrName,fact.nsmap)] = attrValue # using qname allows setting prefix in extracted instance
@@ -648,7 +649,7 @@ def discoverIxdsDts(modelXbrl):
 class TargetChoiceDialog:
     def __init__(self,parent, choices):
         from tkinter import Toplevel, Label, Listbox, StringVar
-        parentGeometry = re.match("(\d+)x(\d+)[+]?([-]?\d+)[+]?([-]?\d+)", parent.geometry())
+        parentGeometry = re.match(r"(\d+)x(\d+)[+]?([-]?\d+)[+]?([-]?\d+)", parent.geometry())
         dialogX = int(parentGeometry.group(3))
         dialogY = int(parentGeometry.group(4))
         self.parent = parent

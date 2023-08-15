@@ -1,5 +1,8 @@
 name: Run Xbrl Conformance Suites
+
 on: pull_request_target
+
+permissions: {}
 
 jobs:
   find-tests:
@@ -14,13 +17,13 @@ jobs:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
       - id: build-test-matrix
         run: |
-          printf matrix= >> $GITHUB_OUTPUT
-          basename -s .py tests/integration_tests/validation/conformance_suite_configurations/*.py | grep -v '^efm' | jq -Rsc 'split("\n") | map(select(length > 0))' | tee -a $GITHUB_OUTPUT
+          echo 'matrix<<EOF' >> $GITHUB_OUTPUT
+          python -m tests.integration_tests.validation.discover_tests | tee -a $GITHUB_OUTPUT
+          echo EOF >> $GITHUB_OUTPUT
 
   run-conformance-suite:
-    name: ${{ matrix.test }} - ${{ matrix.os }} - ${{ matrix.python-version }}
+    name: ${{ matrix.test.name }}${{ matrix.test.shard && format(':{0}', matrix.test.shard) || '' }} - ${{ matrix.os }} - ${{ matrix.python-version }}
     needs: find-tests
-    permissions: read-all
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -32,51 +35,52 @@ jobs:
         test: ${{ fromJson(needs.find-tests.outputs.matrix) }}
         include:
           - os: windows-2022
-            python-version: '3.7'
-            test: xbrl_2_1
-          - os: macos-12
-            python-version: '3.7'
-            test: xbrl_2_1
-          - os: ubuntu-22.04
-            python-version: '3.7'
-            test: xbrl_2_1
-
-          - os: windows-2022
             python-version: '3.8'
-            test: xbrl_2_1
+            test:
+              name: xbrl_2_1
           - os: macos-12
             python-version: '3.8'
-            test: xbrl_2_1
+            test:
+              name: xbrl_2_1
           - os: ubuntu-22.04
             python-version: '3.8'
-            test: xbrl_2_1
+            test:
+              name: xbrl_2_1
 
           - os: windows-2022
             python-version: '3.9'
-            test: xbrl_2_1
+            test:
+              name: xbrl_2_1
           - os: macos-12
             python-version: '3.9'
-            test: xbrl_2_1
+            test:
+              name: xbrl_2_1
           - os: ubuntu-22.04
             python-version: '3.9'
-            test: xbrl_2_1
+            test:
+              name: xbrl_2_1
 
           - os: windows-2022
             python-version: '3.10'
-            test: xbrl_2_1
+            test:
+              name: xbrl_2_1
           - os: macos-12
             python-version: '3.10'
-            test: xbrl_2_1
+            test:
+              name: xbrl_2_1
           - os: ubuntu-22.04
             python-version: '3.10'
-            test: xbrl_2_1
+            test:
+              name: xbrl_2_1
 
           - os: windows-2022
             python-version: '3.11'
-            test: xbrl_2_1
+            test:
+              name: xbrl_2_1
           - os: macos-12
             python-version: '3.11'
-            test: xbrl_2_1
+            test:
+              name: xbrl_2_1
 
     environment: integration-tests
     steps:
@@ -107,13 +111,13 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
       - name: Checkout EdgarRenderer
-        if: ${{ matrix.test == 'efm_current' }}
+        if: ${{ matrix.test.name == 'efm_current' }}
         uses: actions/checkout@v3.5.3
         with:
           repository: Arelle/EdgarRenderer
           path: arelle/plugin/EdgarRenderer
       - name: Install Python 3
-        uses: actions/setup-python@v4.6.1
+        uses: actions/setup-python@v4.7.0
         with:
           cache: 'pip'
           check-latest: true
@@ -123,7 +127,7 @@ jobs:
           python -m pip install --upgrade pip setuptools wheel
           pip install -r requirements-dev.txt
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2.1.0
+        uses: aws-actions/configure-aws-credentials@v2.2.0
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
@@ -131,4 +135,4 @@ jobs:
       - name: Download from S3
         run: aws s3 sync s3://arelle tests/resources
       - name: Run integration tests with pytest
-        run: pytest -s --disable-warnings --offline --name ${{ matrix.test }} tests/integration_tests/validation/test_conformance_suites.py
+        run: pytest -s --disable-warnings --offline --name=${{ matrix.test.name }}${{ matrix.test.shard && format(' --shard={0}', matrix.test.shard) || '' }} tests/integration_tests/validation/test_conformance_suites.py

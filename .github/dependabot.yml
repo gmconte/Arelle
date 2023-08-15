@@ -4,16 +4,33 @@ updates:
     directory: "/"
     schedule:
       interval: weekly
-    open-pull-requests-limit: 10
+    groups:
+      dependencies:
+        patterns:
+          - "*"
   - package-ecosystem: pip
     directory: "/"
     schedule:
       interval: weekly
-    open-pull-requests-limit: 10
+    groups:
+      dependencies:
+        patterns:
+          - "*"
     ignore:
       - dependency-name: "RDFLib"
         versions:
           - ">=6"
       - dependency-name: "cx_Freeze"
+      - dependency-name: "matplotlib"
+        versions:
+          - "3.7.2"
       - dependency-name: "packaging"
-      - dependency-name: "importlib_metadata"
+  - package-ecosystem: docker
+    directory: "/"
+    schedule:
+      interval: weekly
+    allow:
+      - dependency-name: "python"
+    ignore:
+      - dependency-name: "python"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]

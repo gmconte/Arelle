@@ -107,8 +107,8 @@ class ModelRelationshipSet:
     def __init__(self, modelXbrl, arcrole, linkrole=None, linkqname=None, arcqname=None, includeProhibits=False):
         self.isChanged = False
         self.modelXbrl = modelXbrl
-        self.arcrole = arcrole # may be str, tuple or frozenset
-        self.linkrole = linkrole # may be str, tuple or frozenset
+        self.arcrole = arcrole # may be str, None, tuple or frozenset
+        self.linkrole = linkrole # may be str, None, tuple or frozenset
         self.linkqname = linkqname
         self.arcqname = arcqname
 

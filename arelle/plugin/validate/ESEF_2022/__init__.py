@@ -175,7 +175,12 @@ def modelXbrlLoadComplete(modelXbrl: ModelXbrl) -> None:
                     validateEntity(modelXbrl, filename, modelXbrl.fileSource)
         else:
             if isinstance(modelXbrl.fileSource.url, str):
-                validateEntity(modelXbrl, modelXbrl.fileSource.url, modelXbrl.fileSource)
+                ixdsDocUrls = getattr(modelXbrl, "ixdsDocUrls", None)
+                if ixdsDocUrls:
+                    for url in ixdsDocUrls:
+                        validateEntity(modelXbrl, url, modelXbrl.fileSource)
+                else:
+                    validateEntity(modelXbrl, modelXbrl.fileSource.url, modelXbrl.fileSource)
             elif isinstance(modelXbrl.fileSource.url, list):
                 for filename in modelXbrl.fileSource.url:
                     validateEntity(modelXbrl, filename, modelXbrl.fileSource)
@@ -1156,7 +1161,7 @@ def validateXbrlFinally(val: ValidateXbrl, *args: Any, **kwargs: Any) -> None:
         # facts in declared units RTS Annex II para 1
         # assume declared currency is one with majority of concepts
         monetaryItemsNotInDeclaredCurrency = []
-        unitCounts = sorted(statementMonetaryUnitFactCounts.items(), key=lambda uc:uc[1], reverse=True) # type: ignore[no-any-return]
+        unitCounts = sorted(statementMonetaryUnitFactCounts.items(), key=lambda uc:uc[1], reverse=True)
         if unitCounts: # must have a monetary statement fact for this check
             _declaredCurrency = unitCounts[0][0]
             for facts in modelXbrl.factsByQname.values():

@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools~=65.3", "wheel~=0.37", "setuptools_scm[toml]~=7.0"]
+requires = ["setuptools~=68.0", "wheel~=0.40", "setuptools_scm[toml]~=7.1"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -19,7 +19,6 @@ classifiers = [
     'License :: OSI Approved :: Apache Software License',
     'Natural Language :: English',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
@@ -27,7 +26,7 @@ classifiers = [
     'Operating System :: OS Independent',
     'Topic :: Text Processing :: Markup :: XML'
 ]
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 dependencies = [
     'certifi',
     'isodate==0.*',
@@ -57,8 +56,13 @@ ESEF = [
 ObjectMaker = [
     'graphviz==0.*',
 ]
+Sphinx = [
+    "myst-parser==2.*",
+    "sphinx==7.*",
+    "furo",
+]
 WebServer = [
-    'cheroot>=8,<10',
+    'cheroot>=8,<11',
     'CherryPy==18.*',
     'tornado==6.*',
 ]
@@ -129,6 +133,7 @@ module = [
     'arelle.ModelObjectFactory',
     'arelle.ModelValue',
     'arelle.ModelXbrl',
+    'arelle.SocketUtils',
     'arelle.SystemInfo',
     'arelle.Updater',
     'arelle.UrlUtil',
@@ -145,7 +150,7 @@ module = [
     'arelle.plugin.functionsMath',
     'arelle.plugin.validate.ESEF.*',
     'arelle.plugin.validate.ESEF_2022.*',
-    'tests.integration_tests',
+    'tests.integration_tests.*',
 ]
 ignore_errors = false
 strict = true

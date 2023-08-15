@@ -1,7 +1,8 @@
 # Arelle
 
-[![pypi-version](https://img.shields.io/pypi/v/arelle-release.svg)](https://pypi.org/project/arelle-release/)
-[![Python Version](https://img.shields.io/pypi/pyversions/arelle-release.svg)](https://pypi.org/project/arelle-release/)
+[![PyPI](https://img.shields.io/pypi/v/arelle-release)](https://pypi.org/project/arelle-release/)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/arelle-release)](https://pypi.org/project/arelle-release/)
+[![Read the Docs](https://img.shields.io/readthedocs/arelle)](https://arelle.readthedocs.io/)
 
 [![Arelle Banner](https://arelle.org/arelle/wp-content/themes/platform/images/logo-platform.png)](https://arelle.org/)
 
@@ -47,7 +48,7 @@ be integrated with other applications and languages utilizing its web service.
 
 ## Installation
 
-The implementation is in Python >= 3.7 and is intended for Windows, macOS, or
+The implementation is in Python >= 3.8 and is intended for Windows, macOS, or
 Linux (tested against Ubuntu). The standard desktop installation includes a GUI,
 a RESTful web server, and CLI. We try to support all operating system versions
 that still receive security updates from their development teams.

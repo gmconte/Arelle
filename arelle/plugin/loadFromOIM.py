@@ -175,8 +175,8 @@ RowIdentifierPattern = re_compile(
      r"[_\-"
      "\xB7A-Za-z0-9\xC0-\xD6\xD8-\xF6\xF8-\xFF\u0100-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD\u0300-\u036F\u203F-\u2040]*$")
 PeriodPattern = re_compile(
-    "^-?[0-9]{4}-[0-9]{2}-[0-9]{2}T([01][0-9]|20|21|22|23):[0-9]{2}:[0-9]{2}(\.[0-9]([0-9]*[1-9])?)?Z?"
-    "(/-?[0-9]{4}-[0-9]{2}-[0-9]{2}T([01][0-9]|20|21|22|23):[0-9]{2}:[0-9]{2}(\.[0-9]([0-9]*[1-9])?)?Z?)?$"
+    r"^-?[0-9]{4}-[0-9]{2}-[0-9]{2}T([01][0-9]|20|21|22|23):[0-9]{2}:[0-9]{2}(\.[0-9]([0-9]*[1-9])?)?Z?"
+    r"(/-?[0-9]{4}-[0-9]{2}-[0-9]{2}T([01][0-9]|20|21|22|23):[0-9]{2}:[0-9]{2}(\.[0-9]([0-9]*[1-9])?)?Z?)?$"
     )
 PrefixedQName = re_compile(
     "[_A-Za-z\xC0-\xD6\xD8-\xF6\xF8-\xFF\u0100-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD]"
@@ -2989,7 +2989,6 @@ def validateFinally(val, *args, **kwargs):
             modelXbrl.error("xbrlxe:unsupportedZeroPrecisionFact",
                             _("Instance has %(count)s precision zero facts"),
                             modelObject=precisionZeroFacts, count=len(precisionZeroFacts))
-        definedContainers = set(rel.contextElement for rel in modelXbrl.relationshipSet(hc_all).modelRelationships)
         containers = {"segment", "scenario"}
         dimContainers = set(t for c in contextsInUse for t in containers if c.dimValues(t))
         if len(dimContainers) > 1:
@@ -2997,22 +2996,12 @@ def validateFinally(val, *args, **kwargs):
                             _("All hypercubes within the DTS of a report MUST be defined for use on the same container (either \"segment\" or \"scenario\")"),
                             modelObject=modelXbrl)
         contextsWithNonDimContent = set()
-        contextsWithNonDimContainer = set()
         contextsWithComplexTypedDimensions = set()
-        containersNotUsedForDimensions = containers - definedContainers
         for context in contextsInUse:
             if context.nonDimValues("segment"):
                 contextsWithNonDimContent.add(context)
-                if "segment" in containersNotUsedForDimensions:
-                    contextsWithNonDimContainer.add(context)
             if context.nonDimValues("scenario"):
                 contextsWithNonDimContent.add(context)
-                if "scenario" in containersNotUsedForDimensions:
-                    contextsWithNonDimContainer.add(context)
-            if context.dimValues("segment") and "segment" in containersNotUsedForDimensions:
-                contextsWithNonDimContainer.add(context)
-            if context.dimValues("scenario") and "scenario" in containersNotUsedForDimensions:
-                contextsWithNonDimContainer.add(context)
             for modelDimension in context.qnameDims.values():
                 if modelDimension.isTyped:
                     typedMember = modelDimension.typedMember
@@ -3025,16 +3014,10 @@ def validateFinally(val, *args, **kwargs):
                             _("Contexts MUST not contain non-dimensional content: %(contexts)s"),
                             modelObject=contextsWithNonDimContent,
                             contexts=", ".join(sorted(c.id for c in contextsWithNonDimContent)))
-        if contextsWithNonDimContainer:
-            modelXbrl.error("xbrlxe:unexpectedContextContent",
-                            _("Contexts not used for dimensions must not contain content in %(containers)s: %(contexts)s"),
-                            modelObject=contextsWithNonDimContainer,
-                            containers=" or ".join(sorted(containersNotUsedForDimensions)),
-                            contexts=", ".join(sorted(c.id for c in contextsWithNonDimContainer)))
         if contextsWithComplexTypedDimensions:
             modelXbrl.error("xbrlxe:unsupportedComplexTypedDimension",  # this pertains only to xBRL-XML validation (JSON and CSV were checked during loading when loadedFromOIM is True)
                             _("Instance has contexts with complex typed dimensions: %(contexts)s"),
-                            modelObject=contextsWithNonDimContainer,
+                            modelObject=contextsWithComplexTypedDimensions,
                             contexts=", ".join(sorted(c.id for c in contextsWithComplexTypedDimensions)))
 
         footnoteRels = modelXbrl.relationshipSet("XBRL-footnotes")
